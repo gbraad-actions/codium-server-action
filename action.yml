@@ -61,7 +61,7 @@ runs:
       run: |
         sleep 5
         echo "Open in a browser: http://${HOSTNAME}:8000"
-        until ! systemctl is-active --quiet codium-server@runner.service
+        until systemctl is-active --quiet codium-server@runner.service
         do
-          sleep 30
+          sleep 10
         done
