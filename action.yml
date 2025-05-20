@@ -1,6 +1,13 @@
 name: "Codium Server"
 description: "Installs and runs Codium Server for debugging purpose"
 author: "Gerard Braad <me@gbraad.nl>"
+
+inputs:
+  hangaround:
+    description: 'Run the hangaround step'
+    required: false
+    default: 'false'
+
 runs:
   using: 'composite'
   steps:
@@ -56,12 +63,21 @@ runs:
       shell: bash
       run: |
         sudo systemctl enable --now codium-server@runner
-    - name: Hang around
+    - name: Usage
       shell: bash
       run: |
         sleep 5
         echo "Open in a browser: http://${HOSTNAME}:8000"
         until systemctl is-active --quiet codium-server@runner.service
+        do
+          sleep 5
+        done
+
+    - name: Hang around
+      if: ${{ inputs.hangaround == 'true' }}
+      shell: bash
+      run: |
+        until ! systemctl is-active --quiet codium-server@runner.service
         do
           sleep 10
         done
