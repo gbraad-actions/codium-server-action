@@ -3,6 +3,10 @@ description: "Installs and runs Codium Server for debugging purpose"
 author: "Gerard Braad <me@gbraad.nl>"
 
 inputs:
+  user:
+    description: 'The user to start the service as'
+    required: false
+    default: 'runner'
   hangaround:
     description: 'Run the hangaround step'
     required: false
@@ -52,8 +56,8 @@ runs:
         ln -sfn "$install_dir" "$install_location/latest"
         rm "$temp_file"
 
-        mkdir -p "$HOME/.local/bin"
-        ln -sfn "$install_location/latest/bin/codium-server" "$HOME/.local/bin/codium-server"
+        mkdir -p "~${{ inputs.user }}/.local/bin"
+        ln -sfn "$install_location/latest/bin/codium-server" "~${{ inputs.user }}/.local/bin/codium-server"
 
         echo "Downloaded and set up VSCodium version $version in $install_dir"
 
@@ -62,13 +66,13 @@ runs:
     - name: Setup server
       shell: bash
       run: |
-        sudo systemctl enable --now codium-server@runner
+        sudo systemctl enable --now codium-server@${{ inputs.user }}
     - name: Usage
       shell: bash
       run: |
         sleep 5
         echo "Open in a browser: http://${HOSTNAME}:8000"
-        until systemctl is-active --quiet codium-server@runner.service
+        until systemctl is-active --quiet codium-server@${{ inputs.user }}.service
         do
           sleep 5
         done
@@ -77,7 +81,7 @@ runs:
       if: ${{ inputs.hangaround == 'true' }}
       shell: bash
       run: |
-        until ! systemctl is-active --quiet codium-server@runner.service
+        until ! systemctl is-active --quiet codium-server@${{ inputs.user }}.service
         do
           sleep 10
         done
